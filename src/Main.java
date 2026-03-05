@@ -57,7 +57,7 @@ class RoomInventory {
     public RoomInventory() {
         inventory = new HashMap<>();
         inventory.put("Single Room", 10);
-        inventory.put("Double Room",  7);
+        inventory.put("Double Room",  0);
         inventory.put("Suite Room",   3);
     }
 
@@ -88,6 +88,10 @@ class RoomInventory {
                 + " (count: " + initialCount + ")");
     }
 
+    public HashMap<String, Integer> getInventorySnapshot() {
+        return new HashMap<>(inventory);
+    }
+
     public void displayInventory() {
         System.out.println("\n  ── Current Room Inventory ──────────────────────────");
         System.out.printf("  %-20s  %s%n", "Room Type", "Available Rooms");
@@ -99,51 +103,111 @@ class RoomInventory {
     }
 }
 
-class UseCase3HotelBookingApp {
+class RoomSearchService {
+
+    private RoomInventory inventory;
+    private Map<String, Room> roomCatalog;
+
+    public RoomSearchService(RoomInventory inventory) {
+        this.inventory   = inventory;
+        this.roomCatalog = new HashMap<>();
+        roomCatalog.put("Single Room", new SingleRoom("R101"));
+        roomCatalog.put("Double Room", new DoubleRoom("R201"));
+        roomCatalog.put("Suite Room",  new SuiteRoom("R301"));
+    }
+
+    public void searchAvailableRooms() {
+        System.out.println("\n  ── Available Rooms ─────────────────────────────────");
+
+        HashMap<String, Integer> snapshot = inventory.getInventorySnapshot();
+        boolean anyAvailable = false;
+
+        for (Map.Entry<String, Integer> entry : snapshot.entrySet()) {
+            String roomType = entry.getKey();
+            int    count    = entry.getValue();
+
+            if (count <= 0) {
+                continue;
+            }
+
+            Room room = roomCatalog.get(roomType);
+            if (room == null) {
+                continue;
+            }
+
+            anyAvailable = true;
+            System.out.println("\n  ----------------------------------------------------");
+            room.displayRoomDetails();
+            System.out.println("  Rooms Available : " + count);
+        }
+
+        if (!anyAvailable) {
+            System.out.println("\n  No rooms are currently available.");
+        }
+
+        System.out.println("\n  " + "-".repeat(52));
+        System.out.println("  [INFO] Search complete. Inventory was not modified.");
+    }
+
+    public void searchByRoomType(String roomType) {
+        System.out.println("\n  ── Search Result for: " + roomType + " ─────────────────");
+
+        int count = inventory.getAvailability(roomType);
+        Room room = roomCatalog.get(roomType);
+
+        if (room == null) {
+            System.out.println("  [ERROR] Room type not recognized: " + roomType);
+            return;
+        }
+
+        if (count <= 0) {
+            System.out.println("  [UNAVAILABLE] " + roomType + " is fully booked.");
+            return;
+        }
+
+        System.out.println();
+        room.displayRoomDetails();
+        System.out.println("  Rooms Available : " + count);
+        System.out.println("  " + "-".repeat(52));
+    }
+}
+
+class UseCase4HotelBookingApp {
 
     public static void main(String[] args) {
 
         System.out.println("============================================================");
         System.out.println("        Welcome to Book My Stay App                        ");
-        System.out.println("        Hotel Booking Management System  v3.0              ");
+        System.out.println("        Hotel Booking Management System  v4.0              ");
         System.out.println("============================================================");
 
         System.out.println("\n[STEP 1] Initializing Room Inventory...");
         RoomInventory inventory = new RoomInventory();
         inventory.displayInventory();
 
-        System.out.println("\n[STEP 2] Checking Room Availability...");
-        System.out.println("  Single Room available : " + inventory.getAvailability("Single Room"));
-        System.out.println("  Double Room available : " + inventory.getAvailability("Double Room"));
-        System.out.println("  Suite  Room available : " + inventory.getAvailability("Suite Room"));
+        System.out.println("\n[STEP 2] Initializing Room Search Service...");
+        RoomSearchService searchService = new RoomSearchService(inventory);
+        System.out.println("  [INFO] Search service ready. Read-only access enforced.");
 
-        System.out.println("\n[STEP 3] Simulating a Booking (Double Room booked by a guest)...");
-        int updatedDoubleCount = inventory.getAvailability("Double Room") - 1;
-        inventory.updateAvailability("Double Room", updatedDoubleCount);
+        System.out.println("\n[STEP 3] Guest searches all available rooms...");
+        searchService.searchAvailableRooms();
 
-        System.out.println("\n[STEP 4] Adding a New Room Type (Penthouse)...");
-        inventory.addRoomType("Penthouse", 2);
+        System.out.println("\n[STEP 4] Guest searches for a specific room type (Suite Room)...");
+        searchService.searchByRoomType("Suite Room");
 
-        System.out.println("\n[STEP 5] Final Inventory State:");
+        System.out.println("\n[STEP 5] Guest searches for an unavailable room type (Double Room)...");
+        searchService.searchByRoomType("Double Room");
+
+        System.out.println("\n[STEP 6] Guest searches for an unrecognized room type...");
+        searchService.searchByRoomType("Penthouse");
+
+        System.out.println("\n[STEP 7] Verifying inventory was not modified during search...");
         inventory.displayInventory();
 
-        System.out.println("\n[STEP 6] Room Details:");
-        Room[] rooms = {
-                new SingleRoom("R101"),
-                new DoubleRoom("R201"),
-                new SuiteRoom("R301")
-        };
-        for (Room room : rooms) {
-            System.out.println("\n  ----------------------------------------------------");
-            room.displayRoomDetails();
-            System.out.println("  Availability  : "
-                    + (inventory.getAvailability(room.getRoomType()) > 0 ? "Available" : "Not Available"));
-        }
-
         System.out.println("\n============================================================");
-        System.out.println("  HashMap replaces scattered variables with a single,       ");
-        System.out.println("  centralized source of truth. O(1) access ensures          ");
-        System.out.println("  consistent and scalable inventory management.             ");
+        System.out.println("  Search operations are fully read-only. Inventory state    ");
+        System.out.println("  remains unchanged. Only rooms with availability > 0       ");
+        System.out.println("  are shown, enforcing defensive programming principles.    ");
         System.out.println("============================================================");
     }
 }

@@ -1,54 +1,23 @@
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
-class Reservation {
-    String guestName;
-    String roomType;
-
-    Reservation(String guestName, String roomType) {
-        this.guestName = guestName;
-        this.roomType = roomType;
-    }
-}
-
-class BookingHistory {
-
-    private List<Reservation> reservations = new ArrayList<>();
-
-    public void addReservation(Reservation reservation) {
-        reservations.add(reservation);
-    }
-
-    public List<Reservation> getReservations() {
-        return reservations;
-    }
-}
-
-class BookingReportService {
-
-    public void generateReport(List<Reservation> reservations) {
-
-        System.out.println("Booking History and Reporting\n");
-        System.out.println("Booking History Report");
-        System.out.println("---------------------------------------");
-
-        for (Reservation r : reservations) {
-            System.out.println("Guest: " + r.guestName + ", Room Type: " + r.roomType);
-        }
-    }
-}
-
-class BookStayApp {
+class Main {
 
     public static void main(String[] args) {
 
-        BookingHistory history = new BookingHistory();
+        // Display welcome banner
+        System.out.println("=======================================");
+        System.out.println(" === Train Consist Management App === ");
+        System.out.println("=======================================\n");
 
-        history.addReservation(new Reservation("Abhiraj", "Single"));
-        history.addReservation(new Reservation("Shlok", "Double"));
-        history.addReservation(new Reservation("Vani", "Suite"));
+        // Create a dynamic list to store train bogies
+        List<String> trainConsist = new ArrayList<>();
 
-        // Generate report
-        BookingReportService reportService = new BookingReportService();
-        reportService.generateReport(history.getReservations());
+        // Display initial consist information
+        System.out.println("Train initialized successfully...");
+        System.out.println("Initial Bogie Count : " + trainConsist.size());
+        System.out.println("Current Train Consist : " + trainConsist);
+
+        System.out.println("\nSystem ready for operations...");
     }
 }

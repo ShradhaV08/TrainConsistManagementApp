@@ -29,6 +29,7 @@ class BookingReportService {
 
         System.out.println("Booking History and Reporting\n");
         System.out.println("Booking History Report");
+        System.out.println("---------------------------------------");
 
         for (Reservation r : reservations) {
             System.out.println("Guest: " + r.guestName + ", Room Type: " + r.roomType);
